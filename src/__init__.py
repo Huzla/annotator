@@ -1,18 +1,23 @@
 import os
 
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
+if __name__ == "__main__":
+    manager.run()
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRECT_KEY=os.getenv("SECRET_KEY"),
-        DATABASE=os.path.join(app.instance_path, "annotator.postgres")
+        SECRECT_KEY=os.getenv("SECRET_KEY")
     )
 
-    if test_config is None:
-       app.config.from_pyfile("config.py", silent=True)
-    else:
-        app.config.from_mapping(test_config)
+    app.config.from_object(os.environ["APP_SETTINGS"])
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    db = SQLAlchemy(app)
+
+    migrate = Migrate(app, db)
 
     try:
         os.makedirs(app.instance_path)
@@ -23,4 +28,5 @@ def create_app(test_config=None):
     def hello():
         return "Hello"
 
-    return app 
+    return app
+    

@@ -4,7 +4,31 @@ services:
   middle:
     build: .  
     image: annotator-middle:0.0.1
+    command: >
+      sh -c "flask db init && flask db migrate && flask db upgrade && flask run --host=0.0.0.0"
     ports:
       - "3000:5000"
+    environment:
+      SECRECT_KEY: "topSecret"
+      DATABASE_URI: postgresql://user:theBigSecret@db/annotations
+      APP_SETTINGS: config.DevelopmentConfig
+    depends_on: 
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_DB: annotations
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: theBigSecret
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user", "-d", "annotations"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - annotator_db:/var/lib/postgresql/data
     
+volumes:
+  annotator_db:
 
