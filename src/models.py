@@ -9,7 +9,7 @@ class Domain(db.Model):
     name = db.Column(db.String())
     index_page = db.Column(db.String())
     groups = db.Column(db.Integer)
-    annotations = db.relationship("Annotation", backref="domain", lazy=True, cascade="all, delete")
+    annotations = db.relationship("Annotation", backref="domains", lazy=True, cascade="all, delete")
 
     def __init__(self, name, index_page, groups):
         self.name = name
@@ -21,10 +21,10 @@ class Domain(db.Model):
 
 
 class Annotation(db.Model):
-    __tablename__ = "annotation"
+    __tablename__ = "annotations"
 
     id = db.Column(db.Integer, primary_key=True)
-    domain = db.Column(db.Integer, db.ForeignKey("domain.id"))
+    domain = db.Column(db.Integer, db.ForeignKey("domains.id"))
     url = db.Column(db.String())
     group = db.Column(db.Integer)
     classes = db.Column(db.String())
