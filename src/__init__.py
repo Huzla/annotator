@@ -1,8 +1,10 @@
 import os
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+from .models import *
+
 
 if __name__ == "__main__":
     manager.run()
@@ -15,9 +17,9 @@ def create_app(test_config=None):
     app.config.from_object(os.environ["APP_SETTINGS"])
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    db = SQLAlchemy(app)
+    db.init_app(app)
 
-    migrate = Migrate(app, db)
+    Migrate(app, db)
 
     try:
         os.makedirs(app.instance_path)
