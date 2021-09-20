@@ -8,7 +8,8 @@ from .models import *
 
 if __name__ == "__main__":
     manager.run()
-def create_app(test_config=None):
+
+def create_app_and_db():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRECT_KEY=os.getenv("SECRET_KEY")
@@ -17,6 +18,7 @@ def create_app(test_config=None):
     app.config.from_object(os.environ["APP_SETTINGS"])
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    db.app = app
     db.init_app(app)
 
     Migrate(app, db)
@@ -30,5 +32,8 @@ def create_app(test_config=None):
     def hello():
         return "Hello"
 
-    return app
-    
+    return [app, db]
+
+def create_app():
+    app, _ = create_app_and_db()
+    return app    

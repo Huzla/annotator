@@ -30,7 +30,7 @@ class Annotation(db.Model):
     classes = db.Column(db.String())
 
     def __init__(self, domain, url, group, classes):
-        self.domain = domain
+        self.domain = domain.id
         self.url = url
         self.group = group
         self.classes = classes
