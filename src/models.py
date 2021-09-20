@@ -10,6 +10,8 @@ class Domain(db.Model):
     index_page = db.Column(db.String())
     groups = db.Column(db.Integer)
     annotations = db.relationship("Annotation", backref="domains", lazy=True, cascade="all, delete")
+    
+    db.UniqueConstraint(name, index_page)
 
     def __init__(self, name, index_page, groups):
         self.name = name
@@ -28,6 +30,8 @@ class Annotation(db.Model):
     url = db.Column(db.String())
     group = db.Column(db.Integer)
     classes = db.Column(db.String())
+
+    db.UniqueConstraint(domain, url)
 
     def __init__(self, domain, url, group, classes):
         self.domain = domain.id
