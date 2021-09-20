@@ -1,5 +1,5 @@
 import json
-from utils import make_json_post, check_error, array_check, check_dict_field
+from .utils import make_json_post, check_error, array_check, check_dict_field
 
 # GET /domains returns a list of available domains.
 def test_get_domains(client):
@@ -64,14 +64,14 @@ def test_get_domains_instance(client):
     assert check_dict_field(json_dict, "groups", 3)
 
     def annotation_check(target, max_group):
-        return "group" in target 
+        return ("group" in target 
             and target["group"] >= 0 
             and target["group"] <= max_group
             and "url" not in group
             and "classes" in group
             and isinstance(group["classes"], list)
             and "domain" not in group
-            and "id" in target
+            and "id" in target)
 
     assert "annotations" in json_dict and isinstance(json_dict["annotations"], list)
     assert array_check(json_dict["annotations"], lambda item: annotation_check(item, 3))
@@ -93,7 +93,7 @@ def test_get_domains_instance(client):
     # Get annotations for domain that doesn't exist.
     res = get_domain_annotations(10)
 
-    assert res.status_code = 404
+    assert res.status_code == 404
 
 # POST /domains/:id creates a new annotation for the targeted domain.
 # Can increase the groups value of the domain. (This is why there is no PATCH /domains/:id)
@@ -176,10 +176,10 @@ def test_get_annotation(client):
     assert res.status_code == 200
 
     def check_annotation(anno, url, group, classes, domain):
-        return check_dict_field(anno, "url", url)
+        return (check_dict_field(anno, "url", url)
             and check_dict_field(anno, "group", group)
             and check_dict_field(anno, "classes", classes)
-            and check_dict_field(anno, "domain", domain)
+            and check_dict_field(anno, "domain", domain))
 
     json_dict = json.dumps(res.data.decode("utf8"))
 
