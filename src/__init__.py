@@ -4,7 +4,7 @@ from flask import Flask
 from flask_migrate import Migrate
 
 from .models import *
-
+from .views.domains import bp as domains_bp
 
 if __name__ == "__main__":
     manager.run()
@@ -22,6 +22,8 @@ def create_app_and_db():
     db.init_app(app)
 
     Migrate(app, db)
+
+    app.register_blueprint(domains_bp)
 
     try:
         os.makedirs(app.instance_path)

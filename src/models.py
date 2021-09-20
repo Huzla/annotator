@@ -13,7 +13,7 @@ class Domain(db.Model):
     
     db.UniqueConstraint(name, index_page)
 
-    def __init__(self, name, index_page, groups, id=None):
+    def __init__(self, name, index_page, groups=0, id=None):
         if id != None:
             self.id = id
             
@@ -23,6 +23,14 @@ class Domain(db.Model):
 
     def __repr__(self):
         return f"<Domain { self.name } with { self.groups } groups>"
+
+    def to_json(self):
+        return { 
+            "id": self.id,
+            "name": self.name,
+            "index_page": self.index_page,
+            "groups": self.groups,
+         }
 
 
 class Annotation(db.Model):
@@ -47,3 +55,12 @@ class Annotation(db.Model):
 
     def __repr__(self):
         return f"<Annotation at { self.url } of group { self.group } >"
+
+    def to_json():
+        return {
+            "id": self.id,
+            "url": self.url,
+            "group": self.group,
+            "classes": self.classes.split(","),
+            "domain": self.domain
+        }
