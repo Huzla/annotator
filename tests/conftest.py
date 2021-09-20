@@ -8,16 +8,16 @@ def app():
     [app, db] = create_app_and_db()
 
     # Create test data
-    yle_domain = Domain(name="yle.fi", index_page="https://yle.fi/", groups=3)
-    test_domain = Domain(name="test.com", index_page="https://test.com/index", groups=0)
-    kauppa_domain = Domain(name="kauppa.fi", index_page="https://kauppa.fi/products/phones/12345", groups=1)
+    yle_domain = Domain(name="yle.fi", index_page="https://yle.fi/", groups=3, id=1)
+    test_domain = Domain(name="test.com", index_page="https://test.com/index", groups=0, id=2)
+    kauppa_domain = Domain(name="kauppa.fi", index_page="https://kauppa.fi/home", groups=1, id=3)
 
     db.session.add(yle_domain)
     db.session.add(test_domain)
     db.session.add(kauppa_domain)
 
     db.session.commit()
-    
+
     db.session.add(Annotation(url="https://yle.fi/1/test1", group=1, classes="article,article-author" ,domain=yle_domain))
     db.session.add(Annotation(url="https://yle.fi/1/test2", group=1, classes="article,article-author" , domain=yle_domain))
     db.session.add(Annotation(url="https://yle.fi/1/test3", group=1, classes="article" ,domain=yle_domain))
