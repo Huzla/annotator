@@ -69,7 +69,7 @@ def test_get_domains_instance(client):
         return ("group" in target 
             and target["group"] >= 0 
             and target["group"] <= max_group
-            and "url" not in target
+            and "url" in target
             and "classes" in target
             and isinstance(target["classes"], list)
             and "domain" not in target
@@ -107,32 +107,34 @@ def test_post_domains_instance(client):
         "classes": ["article-body"]
     }
 
+    yle_domain = Domain.query.filter_by(name="yle.fi").first()
+
     def post_to_yle(annotation):
-        return make_json_post(client, "/domains/1", annotation)
+        return make_json_post(client, f"/domains/{ yle_domain.id }", annotation)
 
     def get_yle_annotations():
-        return client.get("/domains/1")
+        return client.get(f"/domains/{ yle_domain.id }")
 
-    res = post_to_yle(yle_domain)
+    res = post_to_yle(new_annotation)
 
     assert res.status_code == 200
 
     res = get_yle_annotations()
 
-    json_dict = json.dumps(res.data.decode("utf8"))
+    json_dict = json.loads(res.data.decode("utf8"))
 
     assert array_check(json_dict["annotations"], lambda item: item["url"] == new_annotation["url"] and item["group"] == 1)
 
     new_annotation["group"] = 2
     new_annotation["classes"] = ["article-body" ,"article-author"]
 
-    res = post_to_yle(yle_domain)
+    res = post_to_yle(new_annotation)
 
     assert res.status_code == 200
 
     res = get_yle_annotations()
 
-    json_dict = json.dumps(res.data.decode("utf8"))
+    json_dict = json.loads(res.data.decode("utf8"))
 
     assert array_check(json_dict["annotations"], lambda item: item["url"] == new_annotation["url"] and item["group"] == 2 and item["classes"] == new_annotation["classes"])
 
@@ -146,7 +148,7 @@ def test_post_domains_instance(client):
 
     assert res.status_code == 400
 
-    assert check_error(res.data.decode("utf8"), "Please provide values for: url, group")
+    assert check_error(res.data.decode("utf8"), "Please provide values for: url, classes")
 
     new_annotation = {
         "url": "https://yle.fi/urheilu/123",
@@ -159,7 +161,7 @@ def test_post_domains_instance(client):
     assert res.status_code == 200
 
     res = get_yle_annotations()
-    json_dict = json.dumps(res.data.decode("utf8"))
+    json_dict = json.loads(res.data.decode("utf8"))
     
     assert json_dict["groups"] == 4
 
@@ -184,6 +186,6 @@ def test_get_annotation(client):
             and check_dict_field(anno, "classes", classes)
             and check_dict_field(anno, "domain", domain))
 
-    json_dict = json.dumps(res.data.decode("utf8"))
+    json_dict = json.loads(res.data.decode("utf8"))
 
     assert check_annotation(json_dict, "https://yle.fi/1/test1", 1, ["article","article-author"], yle_domain)

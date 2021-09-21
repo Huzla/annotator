@@ -13,10 +13,7 @@ class Domain(db.Model):
     
     db.UniqueConstraint(name, index_page)
 
-    def __init__(self, name, index_page, groups=0, id=None):
-        if id != None:
-            self.id = id
-            
+    def __init__(self, name, index_page, groups=0):    
         self.name = name
         self.index_page = index_page
         self.groups = groups
@@ -41,11 +38,8 @@ class Annotation(db.Model):
 
     db.UniqueConstraint(domain, url)
 
-    def __init__(self, domain, url, group, classes, id=None):
-        if id != None:
-            self.id = id
-        
-        self.domain = domain.id
+    def __init__(self, domain, url, group, classes):
+        self.domain = domain.id if isinstance(domain, Domain) else domain
         self.url = url
         self.group = group
         self.classes = classes

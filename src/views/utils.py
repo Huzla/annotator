@@ -2,7 +2,7 @@ import logging
 from flask import jsonify
 
 def arr_to_str(arr):
-    ", ".join(arr)
+    return ", ".join(arr)
 
 class ValidationError(Exception):
     def __init__(self, fields):
@@ -12,12 +12,13 @@ class IntegrityError(Exception):
     def __init__(self, message):
         self.message = message
 
-def validate_dict(d, fields):
+
+def validate_dict(d, fields, validators={}):
     missing_fields = []
     result = {}
 
     for f in fields:
-        if f not in d:
+        if f not in d or ( f in validators and validators[f](d[f]) ):
             missing_fields.append(f)
         result[f] = d[f]
 

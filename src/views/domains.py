@@ -25,18 +25,51 @@ def index():
         except ValidationError as ve:
             return error_response(ve.message, 400)
         except Exception as e:
-            return error_response(e.message)
+            return error_response(str(e))
     
     return jsonify([ item.to_json() for item in Domain.query.all() ]), 200
 
-@bp.route("/<int:domain_id>")
+@bp.route("/<int:domain_id>", methods=("GET", "POST"))
 def show_domain_annotations(domain_id):
     try:
+
         domain = Domain.query.filter_by(id=domain_id).first()
 
         if domain == None:
             return "Not found", 404
         
-        return jsonify({ "annotations": [ anno.to_json(exclude=["url", "domain"]) for anno in domain.annotations ], **domain.to_json()})
+        if request.method == "POST":
+            try:
+                obj = json.loads(request.data)
+
+                valid_dict = validate_dict(obj, ["url", "group", "classes"], { "url": lambda u: u == "", "classes": lambda c: len(c) == 0 })
+
+                anno = Annotation.query.filter_by(url=valid_dict["url"], domain=domain_id).first()
+                
+
+                if anno == None:
+                    if valid_dict["group"] < 0:
+                        raise ValidationError(["group"])
+                    anno = Annotation(domain=domain_id, url=valid_dict["url"], group=valid_dict["group"], classes=",".join(valid_dict["classes"]))
+                else:
+                    anno.group = valid_dict["group"]
+                    anno.classes = ",".join(valid_dict["classes"])
+
+                if anno.group > domain.groups:
+                    domain.groups = anno.group
+                    db.session.add(domain)
+
+                db.session.add(anno)
+                db.session.commit()
+
+
+            except ValidationError as ve:
+                return error_response(ve.message, 400)
+            except Exception as e:
+                return error_response(str(e))        
+
+
+        
+        return jsonify({ "annotations": [ anno.to_json(exclude=["domain"]) for anno in domain.annotations ], **domain.to_json()})
     except Exception as e:
-        return error_response(e.message)
+        return error_response(str(e))
