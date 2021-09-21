@@ -3,7 +3,7 @@ version: "3.9"
 services:
   middle:
     build: .  
-    image: annotator-middle:0.0.1
+    image: annotator-middle:1.0.0
     command: >
       sh -c "flask db upgrade && pytest"
     environment:
