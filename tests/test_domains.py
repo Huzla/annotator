@@ -1,5 +1,6 @@
 import json
 from .utils import make_json_post, check_error, array_check, check_dict_field
+from src.models import Domain
 
 # GET /domains returns a list of available domains.
 def test_get_domains(client):
@@ -54,7 +55,8 @@ def test_get_domains_instance(client):
         return client.get(f"/domains/{ id }")
 
     # Get yle annotations
-    res = get_domain_annotations(id)
+    yle_domain = Domain.query.filter_by(name="yle.fi").first()
+    res = get_domain_annotations(yle_domain.id)
 
     assert res.status_code == 200
 
@@ -67,10 +69,10 @@ def test_get_domains_instance(client):
         return ("group" in target 
             and target["group"] >= 0 
             and target["group"] <= max_group
-            and "url" not in group
-            and "classes" in group
-            and isinstance(group["classes"], list)
-            and "domain" not in group
+            and "url" not in target
+            and "classes" in target
+            and isinstance(target["classes"], list)
+            and "domain" not in target
             and "id" in target)
 
     assert "annotations" in json_dict and isinstance(json_dict["annotations"], list)
@@ -78,7 +80,8 @@ def test_get_domains_instance(client):
     assert len(json_dict["annotations"]) == 6
 
     # Get test.com annotations
-    res = get_domain_annotations(2)
+    test_domain = Domain.query.filter_by(name="test.com").first()
+    res = get_domain_annotations(test_domain.id)
 
     assert res.status_code == 200
 
@@ -91,7 +94,7 @@ def test_get_domains_instance(client):
     assert len(json_dict["annotations"]) == 0
 
     # Get annotations for domain that doesn't exist.
-    res = get_domain_annotations(10)
+    res = get_domain_annotations(10000)
 
     assert res.status_code == 404
 

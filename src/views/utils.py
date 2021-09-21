@@ -1,3 +1,6 @@
+import logging
+from flask import jsonify
+
 def arr_to_str(arr):
     ", ".join(arr)
 
@@ -27,3 +30,7 @@ def check_unique_constraint(model, fields_dict):
     if model.query.filter_by(**fields_dict).first() != None:
         raise IntegrityError("Unique constraint not met")
     return None
+
+def error_response(message, code=500):
+    logging.warning(message)
+    return jsonify({ "msg": message }), code

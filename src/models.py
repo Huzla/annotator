@@ -24,13 +24,10 @@ class Domain(db.Model):
     def __repr__(self):
         return f"<Domain { self.name } with { self.groups } groups>"
 
-    def to_json(self):
-        return { 
-            "id": self.id,
-            "name": self.name,
-            "index_page": self.index_page,
-            "groups": self.groups,
-         }
+    def to_json(self, exclude=[]):
+        keys = ["id", "name", "index_page", "groups"]
+
+        return { key: getattr(self, key) for key in keys if key not in exclude }
 
 
 class Annotation(db.Model):
@@ -56,11 +53,15 @@ class Annotation(db.Model):
     def __repr__(self):
         return f"<Annotation at { self.url } of group { self.group } >"
 
-    def to_json():
-        return {
+    def to_json(self, exclude=[]):
+        keys = ["id", "url", "group", "classes", "domain"]
+
+        json_form = { 
             "id": self.id,
             "url": self.url,
             "group": self.group,
             "classes": self.classes.split(","),
             "domain": self.domain
         }
+
+        return { key: json_form[key] for key in keys if key not in exclude }
