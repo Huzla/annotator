@@ -19,10 +19,11 @@ def validate_dict(d, fields):
         result[f] = d[f]
 
     if len(missing_fields) > 0:
-        return ValidationError(missing_fields)
+        raise ValidationError(missing_fields)
 
     return result
 
 def check_unique_constraint(model, fields_dict):
     if model.query.filter_by(**fields_dict).first() != None:
-        return IntegrityError("Unique constraint not met")
+        raise IntegrityError("Unique constraint not met")
+    return None

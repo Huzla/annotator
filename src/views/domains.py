@@ -14,18 +14,18 @@ def index():
 
             valid_dict = validate_dict(obj, ["name", "index_page"])
 
-            if isinstance(valid_dict, ValidationError):
-                logging.warning(f"Invalid domain insert: { valid_dict }")
-                return jsonify({ "msg": valid_dict.message }), 400
-            
-            if isinstance(check_unique_constraint(Domain, valid_dict), IntegrityError):
-                logging.warning(f"Domain unique constriant not met by: { obj }")
-                return jsonify({ "msg": "The domain already exists" }), 400
+            check_unique_constraint(Domain, valid_dict)
             
             db.session.add(Domain(**valid_dict))
             db.session.commit()
 
             return "Done", 200
+        except IntegrityError:
+            logging.warning(f"Domain unique constriant not met by: { obj }")
+            return jsonify({ "msg": "The domain already exists" }), 400
+        except ValidationError:
+            logging.warning(f"Invalid domain insert: { valid_dict }")
+            return jsonify({ "msg": valid_dict.message }), 400
         except Exception as e:
             logging.error(e)
             return jsonify({ "msg": "Internal server error" }), 500
