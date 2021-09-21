@@ -171,12 +171,15 @@ def test_get_annotation(client):
     def get_domain_annotation(domain, anno):
         return client.get(f"/domains/{ domain }/{ anno }")
 
-    yle_domain = {
+    yle_domain = Domain.query.filter_by(name="yle.fi").first()
+    target_anno = yle_domain.annotations[0]
+
+    yle_domain_json = {
         "name": "yle.fi",
         "index_page": "https://yle.fi/",
         "groups": 3
     }
-    res = get_domain_annotation(1, 1)
+    res = get_domain_annotation(yle_domain.id, target_anno.id)
 
     assert res.status_code == 200
 
@@ -188,4 +191,4 @@ def test_get_annotation(client):
 
     json_dict = json.loads(res.data.decode("utf8"))
 
-    assert check_annotation(json_dict, "https://yle.fi/1/test1", 1, ["article","article-author"], yle_domain)
+    assert check_annotation(json_dict, target_anno.url, target_anno.group, target_anno.classes.split(","), yle_domain_json)

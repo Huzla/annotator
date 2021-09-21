@@ -73,3 +73,17 @@ def show_domain_annotations(domain_id):
         return jsonify({ "annotations": [ anno.to_json(exclude=["domain"]) for anno in domain.annotations ], **domain.to_json()})
     except Exception as e:
         return error_response(str(e))
+
+@bp.route("/<int:domain_id>/<int:annotation_id>")
+def show_annotation(domain_id, annotation_id):
+    try:
+        domain = Domain.query.filter_by(id=domain_id).first()
+        annotation = Annotation.query.filter_by(id=annotation_id, domain=domain_id).first()
+
+        if domain == None or annotation == None:
+            return "Not found", 404
+
+        return jsonify({ **annotation.to_json(exclude=["domain"]), "domain": domain.to_json(exclude=["annotations", "id"]) })
+       
+    except Exception as e:
+        return error_response(str(e))
