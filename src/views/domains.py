@@ -19,10 +19,12 @@ def index():
 
             check_unique_constraint(Domain, valid_dict)
             
-            db.session.add(Domain(**valid_dict))
+            new_domain = Domain(**valid_dict)
+
+            db.session.add(new_domain)
             db.session.commit()
 
-            return "Done", 200
+            return jsonify(new_domain.to_json()), 201
         except IntegrityError:
             return error_response("The domain already exists", 400)
         except ValidationError as ve:
@@ -46,7 +48,7 @@ def show_domain_annotations(domain_id):
             try:
                 obj = json.loads(request.data)
 
-                valid_dict = validate_dict(obj, ["url", "group", "classes"], { "url": lambda u: u == "", "classes": lambda c: len(c) == 0 })
+                valid_dict = validate_dict(obj, ["url", "group", "classes", "document"], { "url": lambda u: u == "", "classes": lambda c: len(c) == 0 })
 
                 anno = Annotation.query.filter_by(url=valid_dict["url"], domain=domain_id).first()
                 

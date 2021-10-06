@@ -18,13 +18,13 @@ def app():
 
     db.session.commit()
 
-    db.session.add(Annotation(url="https://yle.fi/1/test1", group=1, classes="article,article-author" ,domain=yle_domain))
-    db.session.add(Annotation(url="https://yle.fi/1/test2", group=1, classes="article,article-author" , domain=yle_domain))
-    db.session.add(Annotation(url="https://yle.fi/1/test3", group=1, classes="article" ,domain=yle_domain))
-    db.session.add(Annotation(url="https://yle.fi/2/test4", group=2, classes="comments,sports-stuff,stats" , domain=yle_domain))
-    db.session.add(Annotation(url="https://yle.fi/2/test5", group=2, classes="comments,sports-stuff,stats" , domain=yle_domain))
-    db.session.add(Annotation(url="https://yle.fi/3/test6", group=3, classes="table-of-stats" , domain=yle_domain))
-    db.session.add(Annotation(url="https://kauppa.fi/products/phones/123456", group=1, classes="product-name,product-description,price-value", domain=kauppa_domain))
+    db.session.add(Annotation(url="https://yle.fi/1/test1", group=1, classes="article,article-author" , document="<html></html>", domain=yle_domain))
+    db.session.add(Annotation(url="https://yle.fi/1/test2", group=1, classes="article,article-author" , document="<html></html>",domain=yle_domain))
+    db.session.add(Annotation(url="https://yle.fi/1/test3", group=1, classes="article" , document="<html></html>", domain=yle_domain))
+    db.session.add(Annotation(url="https://yle.fi/2/test4", group=2, classes="comments,sports-stuff,stats", document="<html></html>", domain=yle_domain))
+    db.session.add(Annotation(url="https://yle.fi/2/test5", group=2, classes="comments,sports-stuff,stats", document="<html></html>", domain=yle_domain))
+    db.session.add(Annotation(url="https://yle.fi/3/test6", group=3, classes="table-of-stats", document="<html></html>", domain=yle_domain))
+    db.session.add(Annotation(url="https://kauppa.fi/products/phones/123456", group=1, classes="product-name,product-description,price-value", document="<html></html>", domain=kauppa_domain))
 
     db.session.commit()
 

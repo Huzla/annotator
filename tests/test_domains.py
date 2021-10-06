@@ -41,7 +41,7 @@ def test_post_domains(client):
 
     res = post_to_domains(new_domain)
 
-    assert res.status_code == 200
+    assert res.status_code == 201
 
     res = post_to_domains(new_domain)
 
@@ -104,6 +104,7 @@ def test_post_domains_instance(client):
     new_annotation = {
         "url": "https://yle/1/news1",
         "group": 1,
+        "document": "<html><body><main>News</main></body></html>",
         "classes": ["article-body"]
     }
 
@@ -141,6 +142,7 @@ def test_post_domains_instance(client):
     new_annotation = {
         "url": "",
         "group": 0,
+        "document": "<html><body><main>News</main></body></html>",
         "classes": ""
     }
 
@@ -153,6 +155,7 @@ def test_post_domains_instance(client):
     new_annotation = {
         "url": "https://yle.fi/urheilu/123",
         "group": 4,
+        "document": "<html><body><main>News</main></body></html>",
         "classes": "sports-body"
     }
 

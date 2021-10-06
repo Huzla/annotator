@@ -33,28 +33,31 @@ class Annotation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.Integer, db.ForeignKey("domains.id"))
     url = db.Column(db.String())
+    document = db.Column(db.String())
     group = db.Column(db.Integer)
     classes = db.Column(db.String())
 
     db.UniqueConstraint(domain, url)
 
-    def __init__(self, domain, url, group, classes):
+    def __init__(self, domain, url, document, group, classes):
         self.domain = domain.id if isinstance(domain, Domain) else domain
         self.url = url
         self.group = group
+        self.document = document
         self.classes = classes
 
     def __repr__(self):
         return f"<Annotation at { self.url } of group { self.group } >"
 
     def to_json(self, exclude=[]):
-        keys = ["id", "url", "group", "classes", "domain"]
+        keys = ["id", "url", "group", "classes", "domain", "document"]
 
         json_form = { 
             "id": self.id,
             "url": self.url,
             "group": self.group,
             "classes": self.classes.split(","),
+            "document": self.document,
             "domain": self.domain
         }
 
