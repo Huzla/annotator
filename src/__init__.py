@@ -11,6 +11,9 @@ if __name__ == "__main__":
 
 def create_app_and_db():
     app = Flask(__name__, instance_relative_config=True)
+
+    app.config["CORS_HEADERS"] = "Content-Type"
+
     app.config.from_mapping(
         SECRECT_KEY=os.getenv("SECRET_KEY")
     )

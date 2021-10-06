@@ -1,10 +1,13 @@
 import json
 import logging
 from flask import Blueprint, jsonify, request
+from flask_cors import CORS
 from ..models import Domain, Annotation, db
 from .utils import ValidationError, validate_dict, check_unique_constraint, IntegrityError, error_response
 
 bp = Blueprint("domains", __name__, url_prefix="/domains")
+
+CORS(bp)
 
 @bp.route("", methods=("GET", "POST"))
 def index():
@@ -27,6 +30,7 @@ def index():
         except Exception as e:
             return error_response(str(e))
     
+    logging.info([ item.to_json() for item in Domain.query.all() ])
     return jsonify([ item.to_json() for item in Domain.query.all() ]), 200
 
 @bp.route("/<int:domain_id>", methods=("GET", "POST"))
