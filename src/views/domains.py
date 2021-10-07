@@ -32,8 +32,7 @@ def index():
         except Exception as e:
             return error_response(str(e))
     
-    logging.info([ item.to_json() for item in Domain.query.all() ])
-    return jsonify([ item.to_json() for item in Domain.query.all() ]), 200
+    return jsonify([ { **item.to_json(), "annotations": Annotation.query.filter_by(domain=item.id).count() } for item in Domain.query.all() ]), 200
 
 @bp.route("/<int:domain_id>", methods=("GET", "POST"))
 def show_domain_annotations(domain_id):
@@ -43,12 +42,12 @@ def show_domain_annotations(domain_id):
 
         if domain == None:
             return "Not found", 404
-        
+
         if request.method == "POST":
             try:
                 obj = json.loads(request.data)
-
-                valid_dict = validate_dict(obj, ["url", "group", "classes", "document"], { "url": lambda u: u == "", "classes": lambda c: len(c) == 0 })
+                
+                valid_dict = validate_dict(obj, ["url", "group", "classes", "document"], { "url": lambda u: u == "" })
 
                 anno = Annotation.query.filter_by(url=valid_dict["url"], domain=domain_id).first()
                 
@@ -56,7 +55,7 @@ def show_domain_annotations(domain_id):
                 if anno == None:
                     if valid_dict["group"] < 0:
                         raise ValidationError(["group"])
-                    anno = Annotation(domain=domain_id, url=valid_dict["url"], group=valid_dict["group"], classes=",".join(valid_dict["classes"]))
+                    anno = Annotation(domain=domain_id, url=valid_dict["url"], group=valid_dict["group"], document=valid_dict["document"], classes=",".join(valid_dict["classes"]))
                 else:
                     anno.group = valid_dict["group"]
                     anno.classes = ",".join(valid_dict["classes"])
@@ -67,11 +66,13 @@ def show_domain_annotations(domain_id):
 
                 db.session.add(anno)
                 db.session.commit()
+                logging.info("Created new annotation")
 
 
             except ValidationError as ve:
                 return error_response(ve.message, 400)
             except Exception as e:
+                logging.error(e)
                 return error_response(str(e))        
 
 

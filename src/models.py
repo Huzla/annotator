@@ -24,7 +24,9 @@ class Domain(db.Model):
     def to_json(self, exclude=[]):
         keys = ["id", "name", "index_page", "groups"]
 
-        return { key: getattr(self, key) for key in keys if key not in exclude }
+        result = { key: getattr(self, key) for key in keys if key not in exclude }
+        
+        return result
 
 
 class Annotation(db.Model):
