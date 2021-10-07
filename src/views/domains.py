@@ -35,7 +35,7 @@ def index():
     return jsonify([ { **item.to_json(), "annotations": Annotation.query.filter_by(domain=item.id).count() } for item in Domain.query.all() ]), 200
 
 @bp.route("/<int:domain_id>", methods=("GET", "POST"))
-def show_domain_annotations(domain_id):
+def show_domain(domain_id):
     try:
 
         domain = Domain.query.filter_by(id=domain_id).first()
@@ -77,9 +77,44 @@ def show_domain_annotations(domain_id):
 
 
         
-        return jsonify({ "annotations": [ anno.to_json(exclude=["domain"]) for anno in domain.annotations ], **domain.to_json()})
+        return jsonify(domain.to_json())
     except Exception as e:
         return error_response(str(e))
+
+@bp.route("/<int:domain_id>/groups/<int:group_id>", methods=(["GET"]))
+def show_domain_annotations_by_group(domain_id, group_id):
+    try:
+        if not db.session.query(Domain.query.filter_by(id=domain_id).exists()).scalar():
+            return "Not found", 404
+
+        start_index = int(request.args.get("start", default=0))
+        limit = int(request.args.get("rows", 0))
+
+        query = Annotation.query.filter_by(domain=domain_id, group=group_id).offset(start_index)
+
+        if limit > 0:
+            query = query.limit(limit)
+
+        return jsonify([ anno.to_json() for anno in query.all() ])
+
+            
+    except Exception as e:
+        logging.error(e)
+        return error_response(str(e))        
+
+
+@bp.route("/<int:domain_id>/groups/<int:group_id>/count", methods=(["GET"]))
+def show_domain_annotations_count_by_group(domain_id, group_id):
+    try:
+        if not db.session.query(Domain.query.filter_by(id=domain_id).exists()).scalar():
+            return "Not found", 404
+
+        return jsonify({"count": Annotation.query.filter_by(domain=domain_id, group=group_id).count() })
+
+            
+    except Exception as e:
+        logging.error(e)
+        return error_response(str(e))        
 
 @bp.route("/<int:domain_id>/<int:annotation_id>")
 def show_annotation(domain_id, annotation_id):
