@@ -1,0 +1,3 @@
+[submodule "annotation-ui"]
+	path = annotation-ui
+	url = git@github.com:Huzla/annotation-ui.git
