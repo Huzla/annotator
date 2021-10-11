@@ -1,9 +1,12 @@
 import json
 import logging
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template_string
 from flask_cors import CORS
 from ..models import Domain, Annotation, db
 from .utils import ValidationError, validate_dict, check_unique_constraint, IntegrityError, error_response
+import urllib.request
+from bs4 import BeautifulSoup
+
 
 bp = Blueprint("domains", __name__, url_prefix="/domains")
 
@@ -127,5 +130,40 @@ def show_annotation(domain_id, annotation_id):
 
         return jsonify({ **annotation.to_json(exclude=["domain"]), "domain": domain.to_json(exclude=["annotations", "id"]) })
        
+    except Exception as e:
+        return error_response(str(e))
+
+@bp.route("/<int:domain_id>/<int:annotation_id>/document")
+def show_annotation_document(domain_id, annotation_id):
+    try:
+        domain = Domain.query.filter_by(id=domain_id).first()
+        annotation = Annotation.query.filter_by(id=annotation_id, domain=domain_id).first()
+
+        if domain == None or annotation == None:
+            return "Not found", 404
+
+        with urllib.request.urlopen(annotation.url) as res:
+            result = (str(BeautifulSoup(res.read(), "html.parser"))
+                .replace('src="/', f'src="https://{ domain.name }/')
+                .replace('href="/', f'href="https://{ domain.name }/')
+                .replace("'/", f"'http://127.0.0.1:3000/domains/{ domain_id }/{ annotation_id }/resource?res=/"))
+            return result.encode("utf-8")
+    
+    except Exception as e:
+        return error_response(str(e))
+
+@bp.route("/<int:domain_id>/<int:annotation_id>/resource")
+def show_annotation_resource(domain_id, annotation_id):
+    try:
+        domain = Domain.query.filter_by(id=domain_id).first()
+        annotation = Annotation.query.filter_by(id=annotation_id, domain=domain_id).first()
+
+        if domain == None or annotation == None:
+            return "Not found", 404
+
+        # TODO: Deal with 403 errors
+        with urllib.request.urlopen(f"https://{ domain.name }/{ request.args.get('res', default='') }") as res:
+            return res.read()
+    
     except Exception as e:
         return error_response(str(e))
