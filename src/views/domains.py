@@ -119,7 +119,7 @@ def show_domain_annotations_count_by_group(domain_id, group_id):
         logging.error(e)
         return error_response(str(e))        
 
-@bp.route("/<int:domain_id>/<int:annotation_id>")
+@bp.route("/<int:domain_id>/<int:annotation_id>", methods=(["GET", "PUT"]))
 def show_annotation(domain_id, annotation_id):
     try:
         domain = Domain.query.filter_by(id=domain_id).first()
@@ -128,9 +128,30 @@ def show_annotation(domain_id, annotation_id):
         if domain == None or annotation == None:
             return "Not found", 404
 
+        if request.method == "PUT":
+            obj = json.loads(request.data)
+                
+            valid_dict = validate_dict(obj, ["url", "group", "classes", "document"], { "url": lambda u: u == "" })
+
+            annotation.group = valid_dict["group"]
+            annotation.classes = ",".join(valid_dict["classes"])
+
+            if annotation.group > domain.groups:
+                domain.groups = annotation.group
+                db.session.add(domain)
+
+            db.session.add(annotation)
+            db.session.commit()
+            logging.info("Updated annotation")
+
+        
+
         return jsonify({ **annotation.to_json(exclude=["domain"]), "domain": domain.to_json(exclude=["annotations", "id"]) })
        
+    except ValidationError as ve:
+        return error_response(ve.message, 400)
     except Exception as e:
+        logging.error(e)
         return error_response(str(e))
 
 @bp.route("/<int:domain_id>/<int:annotation_id>/document")
