@@ -3,7 +3,7 @@ version: "3.9"
 services:
   middle:
     build: .  
-    image: annotator-middle:1.1.1
+    image: annotator-middle:1.1.2
     command: >
       sh -c "flask db upgrade && flask run --host=0.0.0.0"
     ports:
@@ -33,7 +33,7 @@ services:
     build: 
       context: ./annotation-ui/
       dockerfile: Dockerfile.dev
-    image: annotator-ui-dev:0.0.1
+    image: annotator-ui-dev:0.0.2
     user: $UID:$GID
     command: ng serve --host 0.0.0.0
     ports:

@@ -6,3 +6,4 @@ psycopg2-binary
 pytest
 coverage
 beautifulsoup4
+cloudscraper

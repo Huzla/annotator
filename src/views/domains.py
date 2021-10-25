@@ -6,7 +6,8 @@ from ..models import Domain, Annotation, db
 from .utils import ValidationError, validate_dict, check_unique_constraint, IntegrityError, error_response
 import urllib.request
 from bs4 import BeautifulSoup
-
+from functools import reduce
+import cloudscraper
 
 bp = Blueprint("domains", __name__, url_prefix="/domains")
 
@@ -117,9 +118,32 @@ def show_domain_annotations_count_by_group(domain_id, group_id):
             
     except Exception as e:
         logging.error(e)
+        return error_response(str(e))
+
+@bp.route("/<int:domain_id>/groups/<int:group_id>/common_classes", methods=(["GET"]))
+def show_domain_annotations_common_classes_by_group(domain_id, group_id):
+    try:
+        if not db.session.query(Domain.query.filter_by(id=domain_id).exists()).scalar():
+            return "Not found", 404
+        
+        class_names = Annotation.query.filter_by(domain=domain_id, group=group_id).with_entities(Annotation.classes).all()
+
+        if class_names == None:
+            return "Not found", 404
+
+        list_of_lists = map(lambda s: s[0].split(","), class_names)
+        unique_names = set([ class_string for arr in list_of_lists for class_string in arr ])
+
+
+
+        return jsonify([ class_string for class_string in unique_names if reduce(lambda acc, curr: acc and class_string in curr, list_of_lists, True) ])
+
+            
+    except Exception as e:
+        logging.error(e)
         return error_response(str(e))        
 
-@bp.route("/<int:domain_id>/<int:annotation_id>", methods=(["GET", "PUT"]))
+@bp.route("/<int:domain_id>/<int:annotation_id>", methods=(["GET", "PUT", "DELETE"]))
 def show_annotation(domain_id, annotation_id):
     try:
         domain = Domain.query.filter_by(id=domain_id).first()
@@ -127,6 +151,11 @@ def show_annotation(domain_id, annotation_id):
 
         if domain == None or annotation == None:
             return "Not found", 404
+
+        if request.method == "DELETE":
+            db.session.delete(annotation)
+            db.session.commit()
+            return jsonify(annotation.to_json())
 
         if request.method == "PUT":
             obj = json.loads(request.data)
@@ -163,12 +192,13 @@ def show_annotation_document(domain_id, annotation_id):
         if domain == None or annotation == None:
             return "Not found", 404
 
-        with urllib.request.urlopen(annotation.url) as res:
-            result = (str(BeautifulSoup(res.read(), "html.parser"))
-                .replace('src="/', f'src="https://{ domain.name }/')
-                .replace('href="/', f'href="https://{ domain.name }/')
-                .replace("'/", f"'http://127.0.0.1:3000/domains/{ domain_id }/{ annotation_id }/resource?res=/"))
-            return result.encode("utf-8")
+        scraper = cloudscraper.create_scraper()
+        
+        result = (scraper.get(annotation.url).text
+            .replace('src="/', f'src="https://{ domain.name }/')
+            .replace('href="/', f'href="https://{ domain.name }/')
+            .replace("'/", f"'http://127.0.0.1:3000/domains/{ domain_id }/{ annotation_id }/resource?res=/"))
+        return result.encode("utf-8")
     
     except Exception as e:
         return error_response(str(e))
