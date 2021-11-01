@@ -35,7 +35,7 @@ class Annotation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.Integer, db.ForeignKey("domains.id"))
     url = db.Column(db.String())
-    document = db.Column(db.String())
+    document = db.Column(db.Unicode())
     group = db.Column(db.Integer)
     classes = db.Column(db.String())
 

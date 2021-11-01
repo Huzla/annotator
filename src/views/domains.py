@@ -1,5 +1,6 @@
 import json
 import logging
+import html
 from flask import Blueprint, jsonify, request, render_template_string
 from flask_cors import CORS
 from ..models import Domain, Annotation, db
@@ -195,9 +196,12 @@ def show_annotation_document(domain_id, annotation_id):
         scraper = cloudscraper.create_scraper()
         
         result = (scraper.get(annotation.url).text
+            .replace('src="//', 'src="https://')
+            .replace('href="//', 'href="https://')
             .replace('src="/', f'src="https://{ domain.name }/')
             .replace('href="/', f'href="https://{ domain.name }/')
             .replace("'/", f"'http://127.0.0.1:3000/domains/{ domain_id }/{ annotation_id }/resource?res=/"))
+
         return result.encode("utf-8")
     
     except Exception as e:
